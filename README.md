@@ -30,13 +30,16 @@ Airflow is started locally using Docker Compose.
 ## Outputs
 The pipeline writes data between processing layers:
 
+```text
 data/bronze/
 data/silver/
 data/gold/
+```
 
 Quality check results and run metrics are saved for further validation:
-
+```text
 data/quality/
+```
 
 
 
