@@ -12,10 +12,10 @@ def write_parquet(
         ) -> None:
 
     try:
-        writer = df.write.mode(mode) # еременая в которую кладем обьект DataFrameWriter
+        writer = df.write.mode(mode) 
 
         if partition_cols:
-            writer = writer.partitionBy(*partition_cols) # чтобы тут использовать
+            writer = writer.partitionBy(*partition_cols)
 
         writer.parquet(str(path))
         logger.info(f"DataFrame successfully written to {path} with mode {mode}")

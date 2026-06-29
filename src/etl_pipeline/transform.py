@@ -5,15 +5,14 @@ from pyspark.sql.window import Window
  
 def add_bronze_metadata(
         df: DataFrame, 
-        source_file: str,
-        process_date: str
+        source_file: str
         ) -> DataFrame:
 
     return (
         df
         .withColumn("ingestion_ts", F.current_timestamp())
         .withColumn("source_file", F.lit(source_file))
-        .withColumn("pipeline_process_date", F.lit(process_date))
+        # .withColumn("pipeline_process_date", F.lit(process_date))
         )
  
 def prepare_impressions(impressions_df: DataFrame) -> DataFrame:
@@ -52,7 +51,7 @@ def prepare_impressions(impressions_df: DataFrame) -> DataFrame:
 
     impressions_df = impressions_df.withColumn(
         "hardware",
-        F.when(F.col("hardware").isin("mobile phone", "mobile"), F.lit("mobile_phone"))
+        F.when(F.col("hardware").isin("mobile phone", "mobile", "phone"), F.lit("mobile_phone"))
         .when(F.col("hardware") == "desktop", F.lit("desktop"))
         .when(F.col("hardware") == "tablet", F.lit("tablet"))
         .when(F.col("hardware") == "media player", F.lit("connected_device"))
@@ -87,7 +86,7 @@ def prepare_impressions(impressions_df: DataFrame) -> DataFrame:
         )
         .withColumn(
             "reg_time_ts",
-            F.to_timestamp(F.col("reg_time"), "yyyy-MM-dd HH:mm:ss") ##mandatory??
+            F.to_timestamp(F.col("reg_time"), "yyyy-MM-dd HH:mm:ss")
             )
         .withColumn("reg_date", F.to_date(F.col("reg_time_ts")))
         )
@@ -136,7 +135,7 @@ def deduplicate_impressions(impressions_df: DataFrame) -> tuple[DataFrame, DataF
 
     window = Window.partitionBy("uid").orderBy(
         F.desc("_quality_score"),
-        F.col("reg_time_ts").desc_nulls_last(),
+        F.col("reg_time_ts").asc_nulls_last(),
         F.col("site_id").asc_nulls_last(),
         F.col("hardware").asc_nulls_last(),
         F.col("osName").asc_nulls_last(),

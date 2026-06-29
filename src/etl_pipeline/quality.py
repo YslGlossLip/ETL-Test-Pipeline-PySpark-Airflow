@@ -60,7 +60,6 @@ def build_run_metrics(
         process_date: str,
         metrics: dict[str, object] ## ?
         ) -> DataFrame:
-    """Convert pipeline metrics into a small Spark DataFrame."""
 
     rows = [
         (process_date, metric_name, str(metric_value))

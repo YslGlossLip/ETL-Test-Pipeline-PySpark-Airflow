@@ -144,13 +144,11 @@ def main() -> None:
         logger.info("Building bronze layer")
         impressions_bronze = add_bronze_metadata(
             impressions_raw,
-            IMPRESSIONS_FILE_NAME,
-            metrics_process_date
+            IMPRESSIONS_FILE_NAME
         )
         events_bronze = add_bronze_metadata(
             events_raw,
-            EVENTS_FILE_NAME,
-            metrics_process_date
+            EVENTS_FILE_NAME
         )
 
         logger.info("Writing bronze layer")
@@ -171,11 +169,8 @@ def main() -> None:
 
     orphan_events = find_orphan_events(impressions_silver_all_before_dedup, events_silver)
 
-    impressions_silver_before_dedup = filter_impressions_by_process_date(
-        impressions_silver_all_before_dedup, process_date)
-   
+    impressions_silver_before_dedup = filter_impressions_by_process_date(impressions_silver_all_before_dedup, process_date)   
     duplicate_impression_uids = find_duplicated_impression_uids(impressions_silver_before_dedup)
-
     duplicate_event_pairs = find_duplicated_event_pairs(events_silver)
 
 
@@ -183,8 +178,8 @@ def main() -> None:
         impressions_silver_before_dedup
     )
     events_silver_for_process = events_silver.join(
-        impressions_silver.select("uid").dropDuplicates(),
-        on="uid", how="left_semi")
+        impressions_silver.select("uid","reg_date").dropDuplicates(["uid"]),
+        on="uid", how="inner")
     
     orphan_events_for_process = find_orphan_events(impressions_silver, events_silver_for_process)
     duplicate_event_pairs_for_process = find_duplicated_event_pairs(events_silver_for_process)
