@@ -181,6 +181,15 @@ def build_mart(
 
     group_cols = ["reg_date", dimension_col]
 
+    event_tags = [
+        "fclick",
+        "registration",
+        "vcontent",
+        "vlead",
+        "vregistration",
+        "vsignup"
+    ]
+
     impression_counts = (
         impression_clean
         .groupBy(*group_cols)
@@ -190,23 +199,28 @@ def build_mart(
     events_with_dimensions = (
         events_df
         .select("uid", "tag")
-        .join(impression_clean, on="uid", how="inner")
+        .join(
+            impression_clean.select("uid", *group_cols)
+            , on="uid"
+            , how="inner")
     )
 
     event_counts = (
         events_with_dimensions
         .groupBy(*group_cols)
-        .pivot("tag")
+        .pivot("tag", event_tags)
         .agg(F.count(F.lit(1)))
         .fillna(0)
     )
 
-    return (
+    mart = (
         impression_counts
         .join(event_counts, on=group_cols, how="left")
-        .fillna(0)
-        .orderBy(*group_cols)
-    )
+        )
+    
+    mart = mart.fillna(0, subset=event_tags)
+
+    return mart.orderBy(*group_cols)
 
 
 def build_all_marts(

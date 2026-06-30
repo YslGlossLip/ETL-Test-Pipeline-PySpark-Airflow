@@ -31,7 +31,7 @@ def export_parquet_preview(
     if "reg_date" in df.columns:
         df = df.orderBy("reg_date")
 
-    pdf = df.limit(limit).toPandas()
+    pdf = df.toPandas()
     pdf.to_csv(output_file, index=False)
 
     print(f"Exported: {output_file}")
@@ -48,17 +48,25 @@ def main() -> None:
     )
 
     marts = [
-        "mart_by_mm_dma",
-        "mart_by_site_id",
+       # "mart_by_mm_dma",
+       # "mart_by_site_id",
         "mart_by_hardware",
     ]
 
-    for mart_name in marts:
-        export_parquet_preview(
-            spark=spark,
-            input_path=GOLD_DIR / mart_name,
-            output_file=PREVIEW_DIR / f"{mart_name}.csv",
-        )
+    # for mart_name in marts:
+    #     export_parquet_preview(
+    #         spark=spark,
+    #         input_path=GOLD_DIR / mart_name,
+    #         output_file=PREVIEW_DIR / f"{mart_name}.csv",
+    #     )
+    
+    export_parquet_preview(spark = spark, 
+                           input_path = PROJECT_ROOT / "data" / "silver" / "events_clean", 
+                           output_file = PREVIEW_DIR / "events_clean.csv")
+    export_parquet_preview(spark = spark, 
+                           input_path = PROJECT_ROOT / "data" / "silver" / "impressions_clean", 
+                           output_file = PREVIEW_DIR / "impressions_clean.csv")
+    
 
     quality_tables = [
         "duplicate_impression_uids",
@@ -68,12 +76,12 @@ def main() -> None:
         "run_metrics",
     ]
 
-    for table_name in quality_tables:
-        export_parquet_preview(
-            spark=spark,
-            input_path=QUALITY_DIR / table_name,
-            output_file=PREVIEW_DIR / "quality" / f"{table_name}.csv",
-        )
+    # for table_name in quality_tables:
+    #     export_parquet_preview(
+    #         spark=spark,
+    #         input_path=QUALITY_DIR / table_name,
+    #         output_file=PREVIEW_DIR / "quality" / f"{table_name}.csv",
+    # )
 
     spark.stop()
 
